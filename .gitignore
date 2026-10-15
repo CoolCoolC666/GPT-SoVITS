@@ -193,3 +193,11 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+# ---- 视频转文章（tools/video2article）----
+# 本模块**只读外链**一览成文的 config.json，绝不把它复制进仓库；
+# 下面两个文件允许用户就地放一份，但可能含密钥 / Authorization，绝不能进版本库。
+tools/video2article/config.json
+tools/video2article/*_headers.txt
+tools/video2article/__pycache__/

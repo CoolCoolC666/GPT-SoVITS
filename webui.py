@@ -1974,6 +1974,28 @@ with gr.Blocks(title="GPT-SoVITS WebUI", analytics_enabled=False, js=js, css=css
         with gr.TabItem(i18n("2-GPT-SoVITS-变声")):
             gr.Markdown(value=i18n("施工中，请静候佳音"))
 
+        # 3-视频转文章（一览成文）：UI 全部收在 tools/video2article/webui_tab.py，
+        # 这里只挂载一次。包整个 try 是有意的——第三方依赖缺失时不该让
+        # 整个 WebUI 起不来，退化成一段说明文字即可。
+        try:
+            from tools.video2article.webui_tab import mount as mount_video2article
+
+            mount_video2article(i18n)
+        except Exception as _v2a_err:  # noqa: BLE001
+            import traceback as _v2a_tb
+
+            with gr.TabItem("3-视频转文章（加载失败）"):
+                gr.Markdown(
+                    "视频转文章模块加载失败，其余功能不受影响。\n\n"
+                    f"**原因**：`{_v2a_err}`\n\n"
+                    "常见是缺少 `requests` / `openai` / `yt-dlp` 等依赖，"
+                    "可在此目录执行：\n\n"
+                    "```\nruntime/python.exe -m pip install requests openai yt-dlp\n```\n\n"
+                    "<details><summary>完整堆栈</summary>\n\n```\n"
+                    + _v2a_tb.format_exc()
+                    + "\n```\n\n</details>"
+                )
+
     app.queue().launch(  # concurrency_count=511, max_size=1022
         server_name="0.0.0.0",
         inbrowser=True,

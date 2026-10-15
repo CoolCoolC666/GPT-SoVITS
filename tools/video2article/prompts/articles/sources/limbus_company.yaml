@@ -1,0 +1,194 @@
+# Limbus Company - 专名词表 URL 源清单（v1.1，2026-09-12 用户提供参考站）
+# ---------------------------------------------------------------
+# 用途：funasr-hotword / Qwen3-ASR context_file 的来源
+# 流程：build_context.py 读这个文件 → fetch → LLM 抽取 → 写 contexts/limbus_company.txt
+# 验证状态：verified=已 web_search / 用户提供核实存在 / placeholder=占位（待用户确认）/ removed=已废弃
+# 信任度：0.0-1.0，越高越优先；低于 0.6 建议人工 review
+# ---------------------------------------------------------------
+
+game: limbus_company
+version: "v1.1（2026-09-12 用户提供 5 个参考站 + 占位待补充）"
+last_updated: 2026-09-12
+last_verification: 2026-09-12-user-provided
+target_context: contexts/limbus_company.txt
+
+extraction:
+  model: "MiniMax-M3"  # 跟 YilanChengWen 同款
+  prompt_template: |
+    从以下网页内容里，提取 Limbus Company（韩国 Project Moon 开发）的**专有名词**：
+    - 罪人 / Sinner 角色名（含外号、昵称、#编号 0-11）
+    - 12 经理人名（罗佳 / 食指 / 默尔索 / 良秀 / 奥赛罗 / 浮士德 等）
+    - EGO 名（含 EGO 等级 / 罪孽类型 / 武器类型）
+    - 副本 / 关卡（镜中地牢 / 故事章节 / 抽象 / 异常事件 / 人格升华）
+    - 状态 / 机制词（灼伤 / 流血 / 震颤 / 腐蚀 / 呼吸 / 罪孽 / 异常状态 / 战斗机制）
+    - 项目用词（"肉 / 骨 / 血 / 头"等 Limbus 风格代词 / "笼中鸟" / "辛克莱" 等社区高频词）
+    - Project Moon 跨作品引用角色（萝瑞塔 / Faust / 塞尼 来自 Library of Ruina；艾因 / 主管 来自 Lobotomy Corporation）
+
+    输出 JSON 列表，每项 { term: "标准词", aliases: ["别名1", "别名2"], category: "sinners|managers|egos|stages|status_mechanics|project_moon|misc", confidence: 0-1 }
+    只输出 JSON，不要解释。
+  output_format: "json_array"
+  min_confidence: 0.5
+
+sources:
+  # ============ 官方（最高优先级，trust ≥ 0.9，未 verified）============
+  - url: https://limbuscompany.hetsteam.com/
+    name: "Limbus Company 官方主页（Project Moon 官方）"
+    category: official
+    language: ko
+    verified: false
+    trust: 0.95
+    notes: |
+      官方主站，角色 / EGO / 副本名权威来源。
+      韩文界面，需要翻译或爬虫处理。
+      待 web_search 验证 URL 可访问 + 解析结构稳定。
+
+  - url: https://www.projectmoon.kr/
+    name: "Project Moon 官方主页"
+    category: official
+    language: ko
+    verified: false
+    trust: 0.95
+    notes: |
+      母公司主页，跨作品（Library of Ruina / Lobotomy Corporation / Limbus Company）资料。
+      角色背景 / 世界观设定权威来源。
+      待 web_search 验证。
+
+  # ============ 中文社区 Wiki（用户 2026-09-12 提供，verified）============
+  - url: https://limbuscompany.huijiwiki.com/wiki/%E9%A6%96%E9%A1%B5
+    name: "边狱公司 - 灰机 Wiki"
+    category: community-wiki
+    language: zh
+    verified: true
+    verified_by: "user-provided 2026-09-12"
+    trust: 0.85
+    notes: |
+      灰机 wiki（huijiwiki）中文 Limbus Company 资料站。
+      用户 2026-09-12 主动提供。
+      URL 含 URL 编码（%E9%A6%96%E9%A1%B5 = 首页），实际访问用：
+        https://limbuscompany.huijiwiki.com/wiki/首页
+      适合中文专有名词主参考站。
+
+  - url: https://wiki.biligame.com/limbuscompany/%E9%A6%96%E9%A1%B5
+    name: "边狱公司 - B 站游戏 Wiki (biligame)"
+    category: community-wiki
+    language: zh
+    verified: true
+    verified_by: "user-provided 2026-09-12"
+    trust: 0.5
+    notes: |
+      B 站官方 wiki 系统（biligame）下的 Limbus Company 子站。
+      用户 2026-09-12 主动提供。
+      **⚠️ 用户 2026-09-12 订正：已于 2023-08 左右停止更新**
+      HTTP 探测 2026-09-12 仍 200（页面在，没 404），但内容**严重过时**。
+      trust 0.8 → 0.5，仅作"历史资料"参考，主推荐改 wiki.gg / Fandom / 灰机。
+
+  # ============ 英文社区 Wiki（用户 2026-09-12 提供，verified）============
+  - url: https://limbuscompany.fandom.com/wiki/Limbus_Company_Wiki
+    name: "Limbus Company Fandom Wiki"
+    category: community-wiki
+    language: en
+    verified: true
+    verified_by: "user-provided 2026-09-12"
+    trust: 0.85
+    notes: |
+      英文 Fandom wiki 主入口。
+      用户 2026-09-12 主动提供。
+      覆盖最全（含 Lobotomy / Library of Ruina / Limbus 全部作品）。
+      跨作品引用必备。
+
+  - url: https://limbuscompany.wiki.gg/
+    name: "Limbus Company wiki.gg"
+    category: community-wiki
+    language: en
+    verified: true
+    verified_by: "user-provided 2026-09-12"
+    trust: 0.65
+    notes: |
+      wiki.gg 平台上的 Limbus Company 子站。
+      用户 2026-09-12 主动提供。
+      相对较新，覆盖可能不全。
+      备选来源，权重低于 Fandom。
+
+  # ============ 英文数据库（用户 2026-09-12 提供，verified）============
+  - url: https://www.prydwen.gg/limbus-company/identities
+    name: "Prydwen - Limbus Company 角色 (Identities) 页"
+    category: database
+    language: en
+    verified: true
+    verified_by: "user-provided 2026-09-12"
+    trust: 0.8
+    notes: |
+      Prydwen 是英文 ACGN 数据库，覆盖很多二次元游戏（Arknights / Limbus / Nikke 等）。
+      用户 2026-09-12 主动提供 identities 页面 URL。
+      角色（罪人）信息结构化表格化，便于正则抽取。
+      适合抽取"罪人 / 罪人编号 / 武器 / 抗性 / 关键字"等。
+
+  # ============ B 站 UP 主资源（占位）============
+  - url: https://space.bilibili.com/1897542110/
+    name: "B 站 Limbus Company UP 主资源"
+    category: video
+    language: zh
+    verified: false
+    trust: 0.7
+    notes: |
+      占位 UID，需要用户给常用 B 站 Limbus UP 主 ID。
+      转写时可直接从这些 UP 的视频简介 / 评论区捞生僻词。
+
+  # ============ 中文社区论坛（占位）============
+  - url: https://www.zhihu.com/topic/25886423
+    name: "知乎 Limbus Company 话题"
+    category: forum
+    language: zh
+    verified: false
+    trust: 0.5
+    notes: |
+      占位 URL，知乎话题 ID 待用户确认。
+      适合查"边狱公司 攻略 / 评测"等长文评论里的生僻词。
+
+  # ============ 待用户补充（翻译组、Discord、EGO 数据库等）============
+  # - url: https://...
+  #   name: "中文 Limbus 翻译组官网"
+  #   category: localization
+  #   language: zh
+  #   verified: false
+  #   trust: 0.8
+  #   notes: |
+  #     中文译名权威来源，E.G.O / 罪孽 / 状态等专名翻译稳定。
+
+  # - url: https://...
+  #   name: "Project Moon Discord 频道（爬虫友好？）"
+  #   category: community
+  #   language: en
+  #   verified: false
+  #   trust: 0.6
+  #   notes: |
+  #     社区高频词源头，但 Discord 反爬严，谨慎接入。
+
+  # - url: https://...
+  #   name: "Limbus EGO 数据库（玩家自制）"
+  #   category: database
+  #   language: zh
+  #   verified: false
+  #   trust: 0.7
+  #   notes: |
+  #     EGO 等级 / 罪孽类型 / 抗性 表格化，便于正则抽取。
+
+# ============ 已废弃（删除时移到这）============
+# - url: https://www.prts.wiki/
+#   name: "PRTS Wiki"
+#   reason: "原为 Arknights 资料站，**不覆盖 Limbus Company**，已废弃。"
+#   removed: 2026-09-12
+
+context_generation:
+  enabled: false  # 设为 true 后 build_context.py 才会处理这个 yaml
+  min_terms: 30   # 至少 30 个专名才生成 contexts/limbus_company.txt，避免空词表
+  max_terms: 500
+  format: "Qwen3-ASR context 格式（每行 '主词 别名1 别名2 ...'）"
+
+maintenance:
+  owner: "映月Moonlight"  # 占位，待用户填
+  update_trigger: |
+    - Limbus Company 重大版本（角色新增 / EGO 改版 / 新副本）
+    - 用户报告 ASR 误识率上升
+    - 季度 review（每年 1/4 / 4 / 7 / 10 月）
+  next_review: "2026-10-01"

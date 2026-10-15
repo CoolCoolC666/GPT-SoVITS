@@ -1,1 +1,8 @@
 faster-whisper
+
+# 视频转文章（tools/video2article）所需依赖。
+# 不装也能用：模块只在这几个 import 失败时给出对应提示，其余功能不受影响。
+# 安装：runtime/python.exe -m pip install openai yt-dlp anthropic
+openai
+yt-dlp
+anthropic
