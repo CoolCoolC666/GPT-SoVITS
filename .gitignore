@@ -201,3 +201,9 @@ cython_debug/
 tools/video2article/config.json
 tools/video2article/*_headers.txt
 tools/video2article/__pycache__/
+
+
+# ---- 云端 ASR 引擎设置（tools/asr）----
+# 含讯飞 APPID/SecretKey、ASR 服务 API Key 等凭证，绝不能进版本库。
+tools/asr/cloud_config.json
+tools/asr/cloud_headers.txt

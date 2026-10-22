@@ -1412,7 +1412,10 @@ with gr.Blocks(title="GPT-SoVITS WebUI", analytics_enabled=False, js=js, css=css
                                 label=i18n("ASR 模型"),
                                 choices=list(asr_dict.keys()),
                                 interactive=True,
-                                value="达摩 ASR (中文)",
+                                # 2026-10-22 修正：原值写的是 "达摩 ASR (中文)"，
+                                # 而 asr_dict 里的键是 "达摩 ASR (中文经典)"——对不上，
+                                # Gradio 匹配不到任何选项，下拉框显示为**空**。
+                                value="达摩 ASR (中文经典)",
                             )
                             asr_size = gr.Dropdown(
                                 label=i18n("ASR 模型尺寸"), choices=["large"], interactive=True, value="large"
@@ -1430,6 +1433,22 @@ with gr.Blocks(title="GPT-SoVITS WebUI", analytics_enabled=False, js=js, css=css
                     )
                     close_asr_button = gr.Button(
                         value=process_info(process_name_asr, "close"), variant="primary", visible=False
+                    )
+
+                # 云端 ASR 引擎（讯飞听见 / 自定义 POST）的凭证与参数设置。
+                # 面板收在 tools/asr/cloud_settings_ui.py，这里只挂一次，
+                # 以免给上游同步维护的 webui.py 增加冲突面。
+                try:
+                    from tools.asr.cloud_settings_ui import build as build_cloud_asr_settings
+
+                    build_cloud_asr_settings()
+                except Exception as _cas_err:
+                    import traceback as _cas_tb
+
+                    gr.Markdown(
+                        "⚠️ 云端 ASR 设置面板加载失败，其余功能不受影响："
+                        f"`{_cas_err}`\n\n"
+                        "```\n" + _cas_tb.format_exc() + "\n```"
                     )
 
                 def change_lang_choices(key):  # 根据选择的模型修改可选的语言
