@@ -225,11 +225,17 @@ def build() -> dict:
 
         if not ok or not imported:
             # 失败：只更新状态与提示，字段一律不动
-            # 输出数量必须与成功分支一致：2（状态+提示）+ 2（引擎+并发）+ 12（讯飞）+ 12（自定义）= 28
+            #
+            # ⚠ 返回值个数必须与 outputs 列表**严格一致**（2 + 23 = 25）：
+            #   2  = 状态 + 提示
+            #   23 = 引擎 + 并发 + 讯飞 10 项 + 自定义 POST 11 项
+            # 多一个少一个，Gradio 在用户点击时抛
+            # "Number of output components does not match"——
+            # 而这条路径恰恰是「导入失败」时才会走到的，最容易漏测。
             return (
                 _status_text(),
                 f"❌ {msg}",
-                *(gr.update() for _ in range(26)),
+                *(gr.update() for _ in range(23)),
             )
 
         xf2 = imported.get("xf_asr") or {}
@@ -262,9 +268,13 @@ def build() -> dict:
             gr.update(value=int(cp2.get("max_wait_seconds", 600) or 600)),
         )
 
+    def _refresh_status():
+        """只读本地状态，不发任何网络请求。"""
+        return _status_text()
+
     show_secret.change(_toggle_secret, inputs=[show_secret], outputs=[xf_secret, cp_api_key])
     engine.change(_switch_engine, inputs=[engine], outputs=[xf_group, cp_group])
-    refresh_btn.click(lambda: _status_text(), outputs=status)
+    refresh_btn.click(_refresh_status, outputs=status)
     save_btn.click(
         _save,
         inputs=[
