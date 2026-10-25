@@ -207,3 +207,12 @@ tools/video2article/__pycache__/
 # 含讯飞 APPID/SecretKey、ASR 服务 API Key 等凭证，绝不能进版本库。
 tools/asr/cloud_config.json
 tools/asr/cloud_headers.txt
+
+
+# ---- 运行时自动下载/生成的产物（不该进仓库）----
+GPT_SoVITS/BigVGAN/demo/
+GPT_SoVITS/BigVGAN/filelists/
+GPT_SoVITS/BigVGAN/nv-modelcard++/
+GPT_SoVITS/text/cmudict_cache.pickle
+GPT_SoVITS/text/ja_userdic/user.dict
+GPT_SoVITS/text/ja_userdic/userdict.md5

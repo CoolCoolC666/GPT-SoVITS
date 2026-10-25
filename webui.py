@@ -611,6 +611,28 @@ def open1Bb(
         os.makedirs("%s/logs_s1" % (s1_dir), exist_ok=True)
         if check_for_existance([s1_dir], is_train=True):
             check_details([s1_dir], is_train=True)
+        # 2026-10-25 新增：训练前校验「BERT 特征长度 == 音素序列长度」。
+        # 不校验的话，错位会在 s1_train 的第一个 step 崩成一句
+        # "The BERT feature dimension (131) ... does not match (136)"，
+        # 离真正的原因（改了标注文本但 3-bert 没重算）十万八千里，
+        # 而且崩在**任何 checkpoint 落盘之前**——训练白跑，模型列表里
+        # 也永远不会出现你训练的模型。这里提前拦下并给出能照做的提示。
+        try:
+            from tools.dataset_check import check_bert_alignment
+
+            _aligned, _align_msg, _bad = check_bert_alignment(s1_dir)
+            if not _aligned:
+                gr.Warning(_align_msg)
+                yield (
+                    i18n("训练已中止：数据集自检未通过"),
+                    {"__type__": "update", "visible": True},
+                    {"__type__": "update", "visible": False},
+                    {"__type__": "update"},
+                    {"__type__": "update"},
+                )
+                return
+        except Exception as _dc_err:
+            print("数据集自检跳过（%s）" % _dc_err)
         if is_half == False:
             data["train"]["precision"] = "32"
             batch_size = max(1, batch_size // 2)
