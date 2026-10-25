@@ -216,3 +216,6 @@ GPT_SoVITS/BigVGAN/nv-modelcard++/
 GPT_SoVITS/text/cmudict_cache.pickle
 GPT_SoVITS/text/ja_userdic/user.dict
 GPT_SoVITS/text/ja_userdic/userdict.md5
+
+# ---- 训练好的模型备份（models_backup/）：体积大，不进版本库 ----
+models_backup/

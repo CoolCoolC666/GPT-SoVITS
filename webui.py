@@ -394,6 +394,29 @@ from tools.asr.config import asr_dict
 process_name_asr = i18n("语音识别")
 
 
+def pick_default_model(names):
+    """模型下拉框的默认值：**优先选训练过的模型**，没有才回落到底模。
+
+    2026-10-25 修正。原代码是 `value=GPT_names[-1]` / `value=SoVITS_names[0]`，
+    而列表是按 `custom_sort_key` 排序的——中文的「不训练直接推vX底模！」排在
+    **最后**，于是 GPT 下拉框的默认值正好是**底模**。
+
+    后果：训完自己的模型后，不改下拉框直接开推理页，就会得到
+    「底模 GPT + 训练声线 SoVITS」这种**不配套**的组合——
+    GPT 侧负责把文本转成语义 token，用底模的话，韵律/停顿/发音都跟
+    训练数据对不上，声音明显不对。实测 2026-10-25 就是这么踩的。
+
+    现在改成：能从名字看出是训练产物的（含路径分隔符或 .pth/.ckpt 后缀）
+    优先取最后一个（通常是最新的那个），没有训练产物才回落到原来的取法。
+    """
+    if not names:
+        return ""
+    trained = [n for n in names if "/" in n or n.endswith((".pth", ".ckpt"))]
+    if trained:
+        return trained[-1]
+    return names[-1]
+
+
 def open_asr(asr_inp_dir, asr_opt_dir, asr_model, asr_model_size, asr_lang, asr_precision):
     global p_asr
     if p_asr is None:
@@ -1931,13 +1954,13 @@ with gr.Blocks(title="GPT-SoVITS WebUI", analytics_enabled=False, js=js, css=css
                             GPT_dropdown = gr.Dropdown(
                                 label=i18n("GPT模型列表"),
                                 choices=GPT_names,
-                                value=GPT_names[-1],
+                                value=pick_default_model(GPT_names),
                                 interactive=True,
                             )
                             SoVITS_dropdown = gr.Dropdown(
                                 label=i18n("SoVITS模型列表"),
                                 choices=SoVITS_names,
-                                value=SoVITS_names[0],
+                                value=pick_default_model(SoVITS_names),
                                 interactive=True,
                             )
                     with gr.Column(scale=2):
