@@ -331,6 +331,31 @@ process_name_tts = i18n("TTS推理WebUI")
 
 def change_tts_inference(bert_path, cnhubert_base_path, gpu_number, gpt_path, sovits_path, batched_infer_enabled):
     global p_tts_inference
+    # 2026-10-25 修正：推理页的 version 必须跟**所选 SoVITS 权重的实际版本**一致。
+    #
+    # 原实现不设 version，子进程继承的是 webui 全局的 os.environ["version"]，
+    # 那个值由「1B-微调训练」tab 的版本单选决定（switch_version 会改它）。
+    # 于是训练完 v5turbo 后把单选切回 v2Pro，再开推理页，就会得到
+    # 「v2Pro 的配置 + v5turbo 的权重」→ 合成报错或出怪声。
+    #
+    # 这里改成从所选权重文件本身推断版本（上游 process_ckpt 里有现成的
+    # get_sovits_version_from_path_fast：预训练底模按 md5 认、微调权重按文件头认）。
+    try:
+        from process_ckpt import get_sovits_version_from_path_fast
+
+        _sovits_real = sovits_path
+        if "！" in _sovits_real or "!" in _sovits_real:
+            from config import name2sovits_path
+
+            _sovits_real = name2sovits_path[_sovits_real]
+        _detected = get_sovits_version_from_path_fast(_sovits_real)
+        # 返回 (version, model_version, if_lora_v3)；推理配置要用 model_version 那一族
+        _ver = _detected[1] if len(_detected) > 1 else _detected[0]
+        if _ver and _ver != os.environ.get("version"):
+            print("推理页版本：%s → %s（按所选 SoVITS 权重推断）" % (os.environ.get("version"), _ver))
+            os.environ["version"] = _ver
+    except Exception as _ver_err:
+        print("推断所选 SoVITS 权重的版本失败，沿用当前 version=%s（%s）" % (os.environ.get("version"), _ver_err))
     if batched_infer_enabled:
         cmd = '"%s" -s GPT_SoVITS/inference_webui_fast.py "%s"' % (python_exec, language)
     else:
